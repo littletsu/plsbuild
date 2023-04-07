@@ -119,7 +119,7 @@ const JAVAC = "javac.exe";
 const JAVA = "java.exe";
 const OUTPATH = "./out";
 const cmd = (s, ...args) => {
-    console.log(`CMD: ${s.replace(JAVAPATH, "JAVAPATH/")}`);
+    console.log(`CMD: ${s.replace(JAVAPATH, "JAVAPATH/")} ${args[0].join(" ")}`);
     return spawn(s, ...args);
 }
 
@@ -166,8 +166,8 @@ const run = () => {
             return console.log(`${JAVAPATH}${JAVA} closed with exit code ${code}`)
         }
         if(!test) return;
-        console.log(`${passed.length} PASSED: ${passed}`);
-        console.log(`${failed.length} FAILED: ${failed}`);
+        console.log(`${passed.length} PASSED${passed.length != 0 ? `: ${passed}` : ""}`);
+        console.log(`${failed.length} FAILED${failed.length != 0 ? `: ${failed}` : ""}`);
     })
 }
 
