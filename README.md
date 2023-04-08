@@ -1,5 +1,12 @@
 # plsbuild
 Script for building and testing Java competitive programming code
+- [Running](#running)
+- [Configuration](#configuration)
+- [Defining tests](#defining-tests)
+  * [In the .java file](#in-the-java-file)
+    + [Example](#example)
+  * [In a file](#in-a-file)
+    + [Example](#example-1)
 
 # Running
 ```sh
