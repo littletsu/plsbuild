@@ -53,9 +53,9 @@ To run the second test definition:
 ```
 node plsbuild Main.java 1
 ```
-### In a file
+## In a file
 `///>.<\\\` - Toggles Input or Output for the following lines. File starts with Input.
-#### Example
+### Example
 > test.txt
 ```3
 1 1 1
