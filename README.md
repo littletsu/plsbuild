@@ -64,7 +64,8 @@ node plsbuild Main.java 1
 `///>.<\\\` - Toggles Input or Output for the following lines. File starts with Input.
 ### Example
 > test.txt
-```3
+```
+3
 1 1 1
 1 0 1
 0 1 0
