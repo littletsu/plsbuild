@@ -1,3 +1,8 @@
+const JAVAPATH = "C:\\Users\\pc\\Desktop\\openjdk-19.0.1_windows-x64_bin\\jdk-19.0.1\\bin\\";
+const JAVAC = "javac.exe";
+const JAVA = "java.exe";
+const OUTPATH = "./out";
+
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
@@ -114,10 +119,6 @@ if(!test && process.argv[3]) {
     console.log(`Couldn't find test ${testarg}`);
 }
 
-const JAVAPATH = "C:\\Users\\pc\\Desktop\\openjdk-19.0.1_windows-x64_bin\\jdk-19.0.1\\bin\\";
-const JAVAC = "javac.exe";
-const JAVA = "java.exe";
-const OUTPATH = "./out";
 const cmd = (s, ...args) => {
     console.log(`CMD: ${s.replace(JAVAPATH, "JAVAPATH/")} ${args[0].join(" ")}`);
     return spawn(s, ...args);
@@ -210,6 +211,6 @@ const runIfSameHash = () => {
     });
     
     fd.pipe(hash);
-}
+};
 
 runIfSameHash();
