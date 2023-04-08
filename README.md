@@ -6,6 +6,10 @@ Script for building and testing Java competitive programming code
 node plsbuild [.java file] [test index or file]
 ```
 
+# Configuration
+The jdk path, javac and java binary name can be changed in the first lines of the script.<br>
+The script checks the hash of the .java file to determine if it should be compiled again or not. To disable this change the `runIfSameHash` function call at the end of the code to `compile`
+
 # Defining tests
 ## In the .java file
 `///>.<\\\` - Indicates that a test definition follows. Test definitions can be placed anywhere in the code<br>
