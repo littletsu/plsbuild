@@ -26,9 +26,9 @@ const Test = (type, data) => ({type, data});
 const IN = 0;
 const OUT = 1;
 const NEWLINE = "\r\n";
-
+const COMMENT = "//";
 class CommentTestReader {
-    constructor(reader, comment="//") {
+    constructor(reader, comment=COMMENT) {
         this.reader = reader;
         this.comment = comment;
         this.testI = -1;
@@ -198,19 +198,16 @@ const runIfSameHash = () => {
     } catch(err) {
         
     }
-    const fd = fs.createReadStream(filename);
+    const file = fs.readFileSync(filename, "utf-8").split('\n').filter(line => !line.startsWith(COMMENT)).join('\n');
     const hash = crypto.createHash('sha1');
     hash.setEncoding('hex');
-    
-    fd.on('end', function() {
-        hash.end();
-        let fileHash = hash.read();
-        fs.writeFileSync(hashPath, fileHash);
-        if(lastHash && (lastHash == fileHash)) return run();
-        return compile();
-    });
-    
-    fd.pipe(hash);
+    hash.write(file);
+    hash.end();
+    let fileHash = hash.read();
+    fs.writeFileSync(hashPath, fileHash);
+    if(lastHash && (lastHash == fileHash)) return run();
+    return compile();
+
 };
 
 runIfSameHash();
