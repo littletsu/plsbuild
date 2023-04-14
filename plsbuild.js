@@ -3,6 +3,9 @@ const JAVAC = "javac.exe";
 const JAVA = "java.exe";
 const OUTPATH = "./out";
 
+const NEWLINE = "\r\n";
+const COMMENT = "//";
+
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
@@ -25,8 +28,7 @@ const Test = (type, data) => ({type, data});
 
 const IN = 0;
 const OUT = 1;
-const NEWLINE = "\r\n";
-const COMMENT = "//";
+
 class CommentTestReader {
     constructor(reader, comment=COMMENT) {
         this.reader = reader;
@@ -131,6 +133,7 @@ const run = () => {
     let stdoutq = [];
     let passed = [];
     let failed = [];
+    let order = [];
 
     if(test) {
         for(let io of test) {
@@ -149,7 +152,8 @@ const run = () => {
     }
 
     const testLine = (line) => {
-        let result = (line == stdoutq[0] ? passed : failed).push(line);
+        let result = (line == stdoutq[0] ? passed : failed).push({line, expected: stdoutq[0]});
+        order.push(line == stdoutq[0]);
         stdoutq.shift();
         return result;
     };
@@ -167,8 +171,10 @@ const run = () => {
             return console.log(`${JAVAPATH}${JAVA} closed with exit code ${code}`)
         }
         if(!test) return;
-        console.log(`${passed.length} PASSED${passed.length != 0 ? `: ${passed}` : ""}`);
-        console.log(`${failed.length} FAILED${failed.length != 0 ? `: ${failed}` : ""}`);
+        console.log(order.map(bool => bool ? "PASSED" : "FAILED").join(', '));
+        console.log(`${passed.length} PASSED${passed.length != 0 ? `: ${passed.map(test => test.line)}` : ""}`);
+        const failmap = failed.map(test => `${test.line}${test.expected !== undefined ? ` (expected ${test.expected})` : ''}`)
+        console.log(`${failed.length} FAILED${failed.length != 0 ? `: ${failmap}` : ""}`);
     })
 }
 
