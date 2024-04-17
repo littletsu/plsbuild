@@ -1,4 +1,4 @@
-const JAVAPATH = "C:\\Users\\pc\\Desktop\\openjdk-19.0.1_windows-x64_bin\\jdk-19.0.1\\bin\\";
+const JAVAPATH = "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.2.13-hotspot\\bin\\";
 const JAVAC = "javac.exe";
 const JAVA = "java.exe";
 const OUTPATH = "./out";
@@ -128,7 +128,7 @@ const cmd = (s, ...args) => {
 
 
 const run = () => {
-    const runCmd = cmd(`${JAVAPATH}${JAVA}`, ["-classpath", OUTPATH, `${classname}`]);
+    const runCmd = cmd(`${JAVAPATH}${JAVA}`, ["-classpath", OUTPATH, `${classname.replace(/\.\//g, "").replace(/\//g, ".")}`]);
     let stdout = "";
     let stdoutq = [];
     let passed = [];
