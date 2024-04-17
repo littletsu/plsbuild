@@ -4,6 +4,7 @@ const JAVA = "java.exe";
 const OUTPATH = "./out";
 
 const NEWLINE = "\r\n";
+const NEWLINEDELIM = NEWLINE[NEWLINE.length-1];
 const COMMENT = "//";
 
 const { spawn } = require('child_process');
@@ -129,6 +130,7 @@ const cmd = (s, ...args) => {
 
 const run = () => {
     const runCmd = cmd(`${JAVAPATH}${JAVA}`, ["-classpath", OUTPATH, `${classname.replace(/\.\//g, "").replace(/\//g, ".")}`]);
+    console.time("TIME")
     let stdout = "";
     let stdoutq = [];
     let passed = [];
@@ -157,24 +159,39 @@ const run = () => {
         stdoutq.shift();
         return result;
     };
+    const consumeLine = (chunk) => {
+        if(test) chunk.toString().split(NEWLINE).filter(line => line.length).forEach(line => testLine(line));
+    }
     runCmd.stderr.on("data", (chunk) => {
         stdout+=chunk;
     })
+    let line = []
+    const delim = NEWLINEDELIM.charCodeAt(0)
     runCmd.stdout.on("data", (chunk) => {
-        if(test) chunk.toString().split(NEWLINE).filter(line => line.length).forEach(line => testLine(line));
-        
+        for(let c of chunk) {
+            line.push(c);
+            if(c == delim) {
+                consumeLine(String.fromCharCode(...line));
+                line = []
+            }
+        }        
         stdout+=chunk;
     })
+    const showTime = () => {
+        console.timeEnd("TIME")
+    }
     runCmd.on("close", (code) => {
+        const endTime = process.hrtime.bigint();
         if(code !== 0) {
             process.stdout.write(stdout);
             return console.log(`${JAVAPATH}${JAVA} closed with exit code ${code}`)
         }
-        if(!test) return;
+        if(!test) return showTime();
         console.log(order.map(bool => bool ? "PASSED" : "FAILED").join(', '));
         console.log(`${passed.length} PASSED${passed.length != 0 ? `: ${passed.map(test => test.line)}` : ""}`);
         const failmap = failed.map(test => `${test.line}${test.expected !== undefined ? ` (expected ${test.expected})` : ''}`)
         console.log(`${failed.length} FAILED${failed.length != 0 ? `: ${failmap}` : ""}`);
+        showTime()
     })
 }
 
