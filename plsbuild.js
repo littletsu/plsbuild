@@ -129,7 +129,7 @@ const cmd = (s, ...args) => {
 
 
 const run = () => {
-    const runCmd = cmd(`${JAVAPATH}${JAVA}`, ["-classpath", OUTPATH, `${classname.replace(/\.\//g, "").replace(/\//g, ".")}`]);
+    const runCmd = cmd(`${JAVAPATH}${JAVA}`, ["-classpath", OUTPATH, `${classname.replace(/\.\//g, "").replace(/\.\\/g, "").replace(/\\/g, ".").replace(/\//g, ".")}`]);
     console.time("TIME")
     let stdout = "";
     let stdoutq = [];
@@ -195,25 +195,29 @@ const run = () => {
     })
 }
 
-const compile = () => {
-    const compileCmd = cmd(`${JAVAPATH}${JAVAC}`, ["-d", OUTPATH, `${classname}.java`]);
-    let stdout = "";
-    compileCmd.stderr.on("data", (chunk) => {
-        stdout+=chunk;
-    })
-    compileCmd.stdout.on("data", (chunk) => {
-        stdout+=chunk;
-    })
-    compileCmd.on("close", (code) => {
-        if(code !== 0) {
-            process.stdout.write(stdout);
-            return console.log(`${JAVAPATH}${JAVAC} closed with exit code ${code}`)
-        }
-        return run();
+const compile = async () => {
+    return new Promise((res, rej) => {
+        const compileCmd = cmd(`${JAVAPATH}${JAVAC}`, ["-d", OUTPATH, `${classname}.java`]);
+        let stdout = "";
+        compileCmd.stderr.on("data", (chunk) => {
+            stdout+=chunk;
+        })
+        compileCmd.stdout.on("data", (chunk) => {
+            stdout+=chunk;
+        })
+        compileCmd.on("close", (code) => {
+            if(code !== 0) {
+                process.stdout.write(stdout);
+                console.log(`${JAVAPATH}${JAVAC} closed with exit code ${code}`);
+                return res(false);
+            }
+            run();
+            return res(true);
+        })
     })
 }
 
-const runIfSameHash = () => {
+const runIfSameHash = async () => {
     const hashPath = path.join(OUTPATH, "lastHash");
     let lastHash;
     try {
@@ -227,10 +231,10 @@ const runIfSameHash = () => {
     hash.write(file);
     hash.end();
     let fileHash = hash.read();
-    fs.writeFileSync(hashPath, fileHash);
     if(lastHash && (lastHash == fileHash)) return run();
-    return compile();
-
+    const compiled = await compile();
+    if(!compiled) return;
+    fs.writeFileSync(hashPath, fileHash);
 };
 
 runIfSameHash();
