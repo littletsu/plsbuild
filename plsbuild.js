@@ -26,6 +26,8 @@ class Reader {
 }
 
 const Test = (type, data) => ({type, data});
+const CONFIG = 2;
+const Config = (data) => ({type: CONFIG, data});
 
 const IN = 0;
 const OUT = 1;
@@ -35,6 +37,7 @@ class CommentTestReader {
         this.reader = reader;
         this.comment = comment;
         this.testI = -1;
+        this.ignoreOut = false;
         this.tests = [];
         this.readLine();
     }
@@ -64,6 +67,11 @@ class CommentTestReader {
         if(line.startsWith(`${this.comment}/>.<\\\\\\`)) {
             this.testI++;
             this.tests[this.testI] = [];
+            if(line.includes("inputonly")) {
+                this.tests[this.testI].push(Config({
+                    inputonly: true
+                }))
+            }
             return this.readIOTest();
         };
     
@@ -136,10 +144,13 @@ const run = () => {
     let passed = [];
     let failed = [];
     let order = [];
-
+    let inputonly = false;
     if(test) {
         for(let io of test) {
             switch(io.type) {
+                case CONFIG:
+                    inputonly = io.data.inputonly;
+                    break;
                 case IN:
                     runCmd.stdin.write(io.data + NEWLINE, (err) => console.assert(!err, err));
                     break;
@@ -168,6 +179,10 @@ const run = () => {
     let line = []
     const delim = NEWLINEDELIM.charCodeAt(0)
     runCmd.stdout.on("data", (chunk) => {
+        if(inputonly) {
+            process.stdout.write(chunk);
+            return;
+        }
         for(let c of chunk) {
             line.push(c);
             if(c == delim) {
@@ -186,7 +201,7 @@ const run = () => {
             process.stdout.write(stdout);
             return console.log(`${JAVAPATH}${JAVA} closed with exit code ${code}`)
         }
-        if(!test) return showTime();
+        if(!test || inputonly) return showTime();
         console.log(order.map(bool => bool ? "PASSED" : "FAILED").join(', '));
         console.log(`${passed.length} PASSED${passed.length != 0 ? `: ${passed.map(test => test.line)}` : ""}`);
         const failmap = failed.map(test => `${test.line}${test.expected !== undefined ? ` (expected ${test.expected})` : ''}`)
