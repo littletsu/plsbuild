@@ -63,15 +63,15 @@ class CommentTestReader {
         const line = this.reader.peek();
         
         if(line === null) return;
-        
-        if(line.startsWith(`${this.comment}/>.<\\\\\\`)) {
+        const toggle = `${this.comment}/>.<\\\\\\`;
+        if(line.startsWith(toggle)) {
             this.testI++;
             this.tests[this.testI] = [];
-            if(line.includes("inputonly")) {
-                this.tests[this.testI].push(Config({
-                    inputonly: true
-                }))
+            const config = {
+                inputonly: line.includes("inputonly"),
+                name: line.slice(toggle.length).trim()
             }
+            this.tests[this.testI].push(Config(config))
             return this.readIOTest();
         };
     
@@ -150,6 +150,10 @@ const run = () => {
             switch(io.type) {
                 case CONFIG:
                     inputonly = io.data.inputonly;
+                    let name = io.data.name;
+                    if(name && name.length > 0) {
+                        console.log(`TEST: ${name}`)
+                    }
                     break;
                 case IN:
                     runCmd.stdin.write(io.data + NEWLINE, (err) => console.assert(!err, err));
